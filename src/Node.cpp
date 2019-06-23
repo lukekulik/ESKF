@@ -1,4 +1,7 @@
 #include <eskf/Node.hpp>
+#include <geometry_msgs/PoseStamped.h>
+#include <geometry_msgs/TwistStamped.h>
+
 
 namespace eskf
 {
@@ -36,7 +39,7 @@ Node::Node(const ros::NodeHandle &nh, const ros::NodeHandle &pnh) : nh_(pnh), in
 
   eskf_.setFusionMask(fusion_mask);
 
-  pubPose_ = nh_.advertise<nav_msgs::Odometry>("pose", 1);
+  pubPose_ = nh_.advertise<geometry_msgs::PoseStamped>("pose", 1);
 
   int publish_rate = default_publish_rate_;
   ros::param::get("~publish_rate", publish_rate);
@@ -133,24 +136,26 @@ void Node::publishState(const ros::TimerEvent&) {
 
   static size_t trace_id_ = 0;
   std_msgs::Header header;
-  header.frame_id = "/pose";
+  header.frame_id = "/map";
   header.seq = trace_id_++;
   header.stamp = ros::Time::now();
 
-  nav_msgs::Odometry odom;
-  odom.header = header;
-  odom.pose.pose.position.x = position[0];
-  odom.pose.pose.position.y = position[1];
-  odom.pose.pose.position.z = position[2];
-  odom.twist.twist.linear.x = velocity[0];
-  odom.twist.twist.linear.y = velocity[1];
-  odom.twist.twist.linear.z = velocity[2];
-  odom.pose.pose.orientation.w = e2g.w();
-  odom.pose.pose.orientation.x = e2g.x();
-  odom.pose.pose.orientation.y = e2g.y();
-  odom.pose.pose.orientation.z = e2g.z();
+  geometry_msgs::PoseStamped pose;
+  pose.header = header;
+  pose.pose.position.x = position[0];
+  pose.pose.position.y = position[1];
+  pose.pose.position.z = position[2];
+  pose.pose.orientation.w = e2g.w();
+  pose.pose.orientation.x = e2g.x();
+  pose.pose.orientation.y = e2g.y();
+  pose.pose.orientation.z = e2g.z();
 
-  pubPose_.publish(odom);
+  // TODO: Add TwistStamped for velocity
+  // odom.twist.twist.linear.x = velocity[0];
+  // odom.twist.twist.linear.y = velocity[1];
+  // odom.twist.twist.linear.z = velocity[2];
+
+  pubPose_.publish(pose);
 }
 
 }
