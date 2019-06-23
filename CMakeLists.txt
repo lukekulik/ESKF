@@ -38,7 +38,7 @@ set(RELEVANT_LIBRARIES
 )
 
 # rigorous error checking
-add_definitions("-Wall -Werror -O3 -std=c++11")
+add_definitions("-Wall -O3 -std=c++11")
 
 # build main filter
 add_executable(${PROJECT_NAME}
